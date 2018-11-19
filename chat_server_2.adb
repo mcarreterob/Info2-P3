@@ -6,7 +6,7 @@ with Chat_Messages;
 with Client_Collections;
 with Ada.Command_Line;
 
-procedure Chat_Server is
+procedure Chat_Server_2 is
    package LLU renames Lower_Layer_UDP;
 	package ATIO renames Ada.Text_IO;
    package ASU renames Ada.Strings.Unbounded;
@@ -123,4 +123,4 @@ exception
                             Ada.Exceptions.Exception_Message(Ex));
       LLU.Finalize;
 
-end Chat_Server;
+end Chat_Server_2;
