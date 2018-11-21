@@ -17,7 +17,8 @@ procedure Chat_Client_2 is
 	use type ASU.Unbounded_String;
 
    Server_EP: LLU.End_Point_Type;
-   Client_EP: LLU.End_Point_Type;
+   Client_EP_Receive: LLU.End_Point_Type; --Para recibir los Welcome
+   Client_EP_Handler: LLU.End_Point_Type; --Para recibir mensajes del server
    Buffer: aliased LLU.Buffer_Type(1024);
    Request: ASU.Unbounded_String;
    Reply: ASU.Unbounded_String;
@@ -29,6 +30,11 @@ procedure Chat_Client_2 is
 	Puerto: Integer;
 	Finish: Boolean := False;
 	Comprobacion: ASU.Unbounded_String;
+   Acogido: Boolean;
+
+   Usage_Error: exception;
+   Name_Error: exception;
+   Server_Error: exception;
 
 begin
 	--Maquina := ASU.To_Unbounded_String(ACL.Argument(1));
@@ -36,103 +42,103 @@ begin
 	Puerto := Integer'Value(ACL.Argument(2));
 	Nick := ASU.To_Unbounded_String(ACL.Argument(3));
 
-   -- Construye el End_Point en el que está atado el servidor
-   Server_EP := LLU.Build(IP, Puerto);
-   -- Construye un End_Point libre cualquiera y se ata a él
-   LLU.Bind_Any(Client_EP);
-
-	if Nick = "reader" then
-		--MODO LECTOR
-		-- reinicializa el buffer para empezar a utilizarlo
-   	LLU.Reset(Buffer);
-		Mess := CM.Init;
-		CM.Message_Type'Output(buffer'Access, Mess);
-
-		-- introduce el End_Point del cliente en el Buffer
-		-- para que el servidor sepa dónde responder
-		LLU.End_Point_Type'Output(Buffer'Access, Client_EP);
-
-		-- introduce el Unbounded_String en el Buffer
-   	-- (se coloca detrás del End_Point introducido antes)
-   	ASU.Unbounded_String'Output(Buffer'Access, Nick);
-
-		-- envía el contenido del Buffer
-   	LLU.Send(Server_EP, Buffer'Access);
-
-	   -- reinicializa (vacía) el buffer para ahora recibir en él
-   	LLU.Reset(Buffer);
-
-		loop
-			-- espera 2.0 segundos a recibir algo dirigido al Client_EP
-   		--   . si llega antes, los datos recibidos van al Buffer
-		   --     y Expired queda a False
-   		--   . si pasados los 2.0 segundos no ha llegado nada, se
-			--abandona la espera y Expired queda a True
-   		LLU.Receive(Client_EP, Buffer'Access, 1000.0, Expired);
-			if Expired then
-				Ada.Text_IO.Put_Line ("Plazo expirado");
-			else
-				-- saca del Buffer un Unbounded_String
-				Mess := CM.Message_Type'Input(Buffer'Access);
-				Nick := ASU.Unbounded_String'Input(Buffer'Access);
-				Reply := ASU.Unbounded_String'Input(Buffer'Access);
-				ATIO.Put_Line(ASU.To_String(Nick) & ": " & ASU.To_String(Reply));
-				--ATIO.Put_Line(ASU.To_String(Reply));
-				LLU.Reset(Buffer);
-			end if;
-		end loop;
-	else
-		--MODO ESCRITOR
-		-- reinicializa el buffer para empezar a utilizarlo
-   	LLU.Reset(Buffer);
-		Mess := CM.Init;
-		CM.Message_Type'Output(buffer'Access, Mess);
-
-		-- introduce el End_Point del cliente en el Buffer
-		-- para que el servidor sepa dónde responder
-		LLU.End_Point_Type'Output(Buffer'Access, Client_EP);
-
-		-- introduce el Unbounded_String en el Buffer
-   	-- (se coloca detrás del End_Point introducido antes)
-   	ASU.Unbounded_String'Output(Buffer'Access, Nick);
-
-		-- envía el contenido del Buffer
-   	LLU.Send(Server_EP, Buffer'Access);
-
-	   -- reinicializa (vacía) el buffer para ahora recibir en él
-   	LLU.Reset(Buffer);
-
-		while not Finish loop
-			--MODO ESCRITOR
-			-- reinicializa el buffer para empezar a utilizarlo
-			LLU.Reset(Buffer);
-			Mess := CM.Writer;
-			CM.Message_Type'Output(buffer'Access, Mess);
-			ATIO.Put("Message: ");
-			Request := ASU.To_Unbounded_String(Ada.Text_IO.Get_Line);
-			if Request = ".quit" then
-				Finish := True;
-			else
-				-- introduce el End_Point del cliente en el Buffer
-				-- para que el servidor sepa dónde responder
-				LLU.End_Point_Type'Output(Buffer'Access, Client_EP);
-
-				-- introduce el Unbounded_String en el Buffer
-				-- (se coloca detrás del End_Point introducido antes)
-				ASU.Unbounded_String'Output(Buffer'Access, Request);
-
-				-- envía el contenido del Buffer
-				LLU.Send(Server_EP, Buffer'Access);
-			end if;
-			-- reinicializa (vacía) el buffer para ahora recibir en él
-   		LLU.Reset(Buffer);
-		end loop;
+	if ACL.Argument_Count /= 3 then
+		raise Usage_Error;
 	end if;
 
-   -- termina Lower_Layer_UDP
+   Server_EP := LLU.Build(IP, Puerto);
+   LLU.Bind_Any(Client_EP_Receive);
+
+	-- ATIO.Put_Line("Mini-Chat v2.0: Welcome " & ASU.To_String(Nick));
+	-- ATIO.Put_Line(">>");
+
+	if Nick = "server" then
+		raise Name_Error;
+	else
+   	LLU.Reset(Buffer);
+		Mess := CM.Init;
+		CM.Message_Type'Output(buffer'Access, Mess);
+		LLU.End_Point_Type'Output(Buffer'Access, Client_EP_Receive);
+		LLU.End_Point_Type'Output(Buffer'Access, Client_EP_Handler);
+   	ASU.Unbounded_String'Output(Buffer'Access, Nick);
+   	LLU.Send(Server_EP, Buffer'Access);
+   	LLU.Reset(Buffer);
+		LLU.Receive(Client_EP_Receive, Buffer'Access, 10.0, Expired);
+      Mess := Mesage_Type'Input(Buffer'Access);
+      Acogido := Boolean'Input(Buffer'Access);
+      if Expired then
+         raise Server_Error;
+      end if;
+      if Acogido
+	end if;
+-------------------------------------------------------------------------
+-----------------------------------P2------------------------------------
+-------------------------------------------------------------------------
+	-- if Nick = "reader" then
+	-- 	--MODO LECTOR
+   -- 	LLU.Reset(Buffer);
+	-- 	Mess := CM.Init;
+	-- 	CM.Message_Type'Output(buffer'Access, Mess);
+	-- 	LLU.End_Point_Type'Output(Buffer'Access, Client_EP_Receive);
+   -- 	ASU.Unbounded_String'Output(Buffer'Access, Nick);
+   --
+   -- 	LLU.Send(Server_EP, Buffer'Access);
+   --
+   -- 	LLU.Reset(Buffer);
+   --
+	-- 	loop
+   -- 		LLU.Receive(Client_EP_Receive, Buffer'Access, 1000.0, Expired);
+	-- 		if Expired then
+	-- 			Ada.Text_IO.Put_Line ("Plazo expirado");
+	-- 		else
+	-- 			Mess := CM.Message_Type'Input(Buffer'Access);
+	-- 			Nick := ASU.Unbounded_String'Input(Buffer'Access);
+	-- 			Reply := ASU.Unbounded_String'Input(Buffer'Access);
+	-- 			ATIO.Put_Line(ASU.To_String(Nick) & ": " & ASU.To_String(Reply));
+	-- 			LLU.Reset(Buffer);
+	-- 		end if;
+	-- 	end loop;
+	-- else
+	-- 	--MODO ESCRITOR
+   -- 	LLU.Reset(Buffer);
+	-- 	Mess := CM.Init;
+	-- 	CM.Message_Type'Output(buffer'Access, Mess);
+	-- 	LLU.End_Point_Type'Output(Buffer'Access, Client_EP_Receive);
+   -- 	ASU.Unbounded_String'Output(Buffer'Access, Nick);
+   -- 	LLU.Send(Server_EP, Buffer'Access);
+   -- 	LLU.Reset(Buffer);
+   --
+	-- 	while not Finish loop
+	-- 		--MODO ESCRITOR
+	-- 		LLU.Reset(Buffer);
+	-- 		Mess := CM.Writer;
+	-- 		CM.Message_Type'Output(buffer'Access, Mess);
+	-- 		ATIO.Put(">> ");
+	-- 		Request := ASU.To_Unbounded_String(Ada.Text_IO.Get_Line);
+	-- 		if Request = ".quit" then
+	-- 			Finish := True;
+	-- 		else
+	-- 			LLU.End_Point_Type'Output(Buffer'Access, Client_EP_Receive);
+	-- 			ASU.Unbounded_String'Output(Buffer'Access, Request);
+	-- 			LLU.Send(Server_EP, Buffer'Access);
+	-- 		end if;
+   -- 		LLU.Reset(Buffer);
+	-- 		ATIO.Put(">> ");
+	-- 	end loop;
+	-- end if;
+
    LLU.Finalize;
 
 exception
+	when Usage_Error =>
+			ATIO.Put_Line("usage: ./chat_client_2 <host_name> <port> <nick>");
+			LLU.Finalize;
+	when Name_Error =>
+		ATIO.Put_Line("Is not allowed to use 'server' as Nick");
+		LLU.Finalize;
+   when Server_Error =>
+      ATIO.Put_Line("Unracheable server.")
+      LLU.Finalize;
    when Ex:others =>
       ATIO.Put_Line ("Excepción imprevista: " &
                             Ada.Exceptions.Exception_Name(Ex) & " en: " &
