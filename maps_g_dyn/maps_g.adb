@@ -1,4 +1,5 @@
 with Ada.Unchecked_Deallocation;
+with Ada.Text_IO;
 with Ada.Strings.Unbounded;
 
 package body Maps_G is
@@ -13,7 +14,7 @@ package body Maps_G is
                   Success : out Boolean) is
       P_Aux: Cell_A;
    begin
-      Value := ASU.Null_Unbounded_String;
+      --Value := ASU.Null_Unbounded_String;
       P_Aux := M.P_First;
       Success := False;
       while not Success and P_Aux /= Null loop
@@ -43,18 +44,10 @@ package body Maps_G is
       if not Success then
          if M.Length < Max_Size then
             M.P_First := new Cell'(Key, Value, M.P_First);
-            P_Aux := M.P_First;
-            if M.Length = 0 then
-               M.P_Last := M.P_First;
-            else
-               P_Aux.Previous := M.P_First;
-            end if;
             M.Length := M.Length + 1;
          else
             raise Full_Map;
          end if;
-      else
-         P_Aux.Value := Value;
       end if;
    end Put;
 
@@ -73,19 +66,9 @@ package body Maps_G is
             M.Length := M.Length - 1;
             if P_Previous /= Null then
                P_Previous.Next := P_Current.Next;
-               if P_Previous.Next = Null then
-                  M.P_Last := P_Previous;
-               else
-                  P_Current.Next.Previous := P_Previous;
-               end if;
             end if;
             if M.P_First = P_Current then
                M.P_First := M.P_First.Next;
-               if M.P_First = Null then
-                  M.P_Last := Null;
-               else
-                  M.P_First.Previous := Null;
-               end if;
             end if;
             Free(P_Current);
          else
@@ -99,3 +82,35 @@ package body Maps_G is
    begin
       return M.Length;
    end Map_Length;
+
+   function First (M: Map) return Cursor is
+   begin
+      return (M => M, Element_A => M.P_First);
+   end First;
+
+   procedure Next (C: in out Cursor) is
+   begin
+      if C.Element_A /= null Then
+         C.Element_A := C.Element_A.Next;
+      end if;
+   end Next;
+
+   function Has_Element (C: Cursor) return Boolean is
+   begin
+      if C.Element_A /= null then
+         return True;
+      else
+         return False;
+      end if;
+   end Has_Element;
+
+   function Element (C: Cursor) return Element_Type is
+   begin
+      if C.Element_A /= null then
+         return (Key   => C.Element_A.Key,
+                 Value => C.Element_A.Value);
+      else
+         raise No_Element;
+      end if;
+   end Element;
+end Maps_G;

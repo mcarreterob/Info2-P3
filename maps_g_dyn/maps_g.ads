@@ -1,4 +1,8 @@
-with Ada.Text_IO;
+--
+--  TAD genérico de una tabla de símbolos (map) implementada como una lista
+--  enlazada no ordenada.
+--
+
 generic
    type Key_Type is private;
    type Value_Type is private;
@@ -31,13 +35,10 @@ package Maps_G is
    --
    -- Cursor Interface for iterating over Map elements
    --
-
    type Cursor is private;
    function First (M: Map) return Cursor;
    procedure Next (C: in out Cursor);
    function Has_Element (C: Cursor) return Boolean;
-   function Last (M:Map) return Cursor;
-   procedure Prev (C: in out Cursor);
 
    type Element_Type is record
       Key:   Key_Type;
@@ -54,7 +55,6 @@ private
    type Cell;
    type Cell_A is access Cell;
    type Cell is record
-      Previous: Cell_A;
       Key   : Key_Type;
       Value : Value_Type;
       Next  : Cell_A;
