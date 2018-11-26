@@ -3,6 +3,7 @@ with Ada.Text_IO;
 with Ada.Strings.Unbounded;
 with Chat_Messages;
 with Ada.Command_Line;
+with Ada.Calendar;
 
 package Server_Handler is
    package ATIO renames Ada.Text_IO;
@@ -12,6 +13,8 @@ package Server_Handler is
    package ACL renames Ada.Command_Line;
    use type CM.Message_Type;
 	use type ASU.Unbounded_String;
+   use type Ada.Calendar.Time;
+   use type LLU.End_Point_Type;
 
    procedure Handler (From: in LLU.End_Point_Type;
                      To: in LLU.End_Point_Type;
