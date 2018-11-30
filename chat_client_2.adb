@@ -64,32 +64,38 @@ begin
    	LLU.Send(Server_EP, Buffer'Access);
    	LLU.Reset(Buffer);
 		LLU.Receive(Client_EP_Receive, Buffer'Access, 10.0, Expired);
-      Mess := CM.Message_Type'Input(Buffer'Access);
-      Acogido := Boolean'Input(Buffer'Access);
       if Expired then
          raise Server_Error;
       end if;
+      Mess := CM.Message_Type'Input(Buffer'Access);
+      Acogido := Boolean'Input(Buffer'Access);
       if Acogido then
          -- MODO ESCRITOR
          ATIO.Put_Line("Mini-Chat v2.0: Welcome " & ASU.To_String(Nick));
          while not Finish loop
             LLU.Reset(Buffer);
             ATIO.Put(">>");
-            Mess := CM.Writer;
-            CM.Message_Type'Output(Buffer'Access, Mess);
-            LLU.End_Point_Type'Output(Buffer'Access, Client_EP_Handler);
-            ASU.Unbounded_String'Output(Buffer'Access, Nick);
             Comentario := ASU.To_Unbounded_String(Ada.Text_IO.Get_Line);
-            ASU.Unbounded_String'Output(Buffer'Access, Comentario);
-         	LLU.Send(Server_EP, Buffer'Access);
             if Comentario = ".quit" then
-               Finish := True;
+               ATIO.Put_Line("vsrgah");
+               LLU.Reset(Buffer);
                Mess := CM.Logout;
                CM.Message_Type'Output(Buffer'Access, Mess);
                LLU.End_Point_Type'Output(Buffer'Access, Client_EP_Handler);
                ASU.Unbounded_String'Output(Buffer'Access, Nick);
             	LLU.Send(Server_EP, Buffer'Access);
+               Finish := True;
                LLU.Finalize;
+            else
+               --ATIO.Put_Line("|" & ASU.To_String(Comentario) & "|");
+               LLU.Reset(Buffer);
+               Mess := CM.Writer;
+               CM.Message_Type'Output(Buffer'Access, Mess);
+               LLU.End_Point_Type'Output(Buffer'Access, Client_EP_Handler);
+               ASU.Unbounded_String'Output(Buffer'Access, Nick);
+               ASU.Unbounded_String'Output(Buffer'Access, Comentario);
+            	LLU.Send(Server_EP, Buffer'Access);
+               LLU.Reset(Buffer);
             end if;
          end loop;
       else
@@ -111,7 +117,7 @@ exception
 		ATIO.Put_Line("Is not allowed to use 'server' as Nick");
 		LLU.Finalize;
    when Server_Error =>
-      ATIO.Put_Line("Unracheable server.");
+      ATIO.Put_Line("Unreacheable server.");
       LLU.Finalize;
    when Ex:others =>
       ATIO.Put_Line ("Excepción imprevista: " &
