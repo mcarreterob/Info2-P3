@@ -14,7 +14,6 @@ package body Maps_G is
                   Success : out Boolean) is
       P_Aux: Cell_A;
    begin
-      --Value := ASU.Null_Unbounded_String;
       P_Aux := M.P_First;
       Success := False;
       while not Success and P_Aux /= Null loop
@@ -85,7 +84,8 @@ package body Maps_G is
 
    function First (M: Map) return Cursor is
    begin
-      return (M => M, Element_A => M.P_First);
+      return (M => M,
+              Element_A => M.P_First);
    end First;
 
    procedure Next (C: in out Cursor) is
