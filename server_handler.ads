@@ -32,8 +32,6 @@ package Server_Handler is
                                          Max_Size => Integer'Value(ACL.Argument(2)),
                                          "=" => ASU."=");
 
-
-
    --TABLA DE SIMBOLOS
    Map_Active: Active_Clients.Map;
    Map_Inactive: Inactive_Clients.Map;
