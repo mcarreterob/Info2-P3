@@ -69,28 +69,19 @@ procedure Chat_Server_2 is
       end loop;
    end Print_InactiveClients_Map;
 
-
    Server_EP: LLU.End_Point_Type;
-   --Client_EP: LLU.End_Point_Type;
-   --Buffer: aliased LLU.Buffer_Type(1024);
-   --Request: ASU.Unbounded_String;
-   --Reply: ASU.Unbounded_String;
 	Maquina: ASU.Unbounded_String := ASU.To_Unbounded_String(LLU.Get_Host_Name);
 	IP: String := LLU.To_IP(ASU.To_String(Maquina));
-	--Expired: Boolean;
-	--Mess: CM.Message_Type;
-	--Nick: ASU.Unbounded_String;
-	--Max_Client: Integer := 50;
-	--Min_Client: Integer := 2;
    Option: Character;
 	Max_Clients: Integer;
+	
+	Arguments_Error: exception;
 
 begin
 
 	Max_Clients:= Integer'Value(ACL.Argument(2));
 	if Max_Clients < 2 or Max_Clients > 50 then
-		ATIO.Put_Line("2 < Number of clients < 50");
-		LLU.Finalize;
+	   raise Arguments_Error;
 	end if;
 
    -- construye un End_Point en una dirección y puerto concretos:
@@ -106,18 +97,30 @@ begin
          ATIO.New_Line;
          ATIO.Put_Line("ACTIVE CLIENTS");
          Print_ActiveClients_Map(Server_Handler.Map_Active);
+         ATIO.New_Line;
       elsif Option = 'O' or Option = 'o' then
          ATIO.New_Line;
          ATIO.Put_Line("OLD CLIENTS");
          Print_InactiveClients_Map(Server_Handler.Map_Inactive);
+         ATIO.New_Line;
       else
+         ATIO.New_Line;
          ATIO.Put("Incorrect option: ");
          ATIO.Put("l or L to show ACTIVE CLIENTS");
          ATIO.Put_Line("o or O to show INACTIVE CLIENTS");
+         ATIO.New_Line;
       end if;
    end loop;
 
 exception
+	When CONSTRAINT_ERROR =>
+	   ATIO.Put_Line("Please, only positive numbers between 2 and 50");
+		LLU.Finalize;
+   when Arguments_Error =>
+      ATIO.New_Line;
+		ATIO.Put_Line("2 < Number of clients < 50");
+      ATIO.New_Line;
+		LLU.Finalize;
    when Ex:others =>
       ATIO.Put_Line ("Excepción imprevista: " &
                             Ada.Exceptions.Exception_Name(Ex) & " en: " &
