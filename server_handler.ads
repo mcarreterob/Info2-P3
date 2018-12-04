@@ -5,6 +5,7 @@ with Chat_Messages;
 with Ada.Command_Line;
 with Ada.Calendar;
 with Maps_G;
+with Arguments_Control;
 
 package Server_Handler is
    package ATIO renames Ada.Text_IO;
@@ -12,10 +13,13 @@ package Server_Handler is
    package CM renames Chat_Messages;
    package ASU renames Ada.Strings.Unbounded;
    package ACL renames Ada.Command_Line;
+   package ArgCtrl renames Arguments_Control;
    use type CM.Message_Type;
 	use type ASU.Unbounded_String;
    use type Ada.Calendar.Time;
    use type LLU.End_Point_Type;
+
+   Max_Clients : Integer := ArgCtrl.Max_Clients_Arg;
 
 	type Client_Data is record
 		Client_EP_Handler: LLU.End_Point_Type;
@@ -29,7 +33,7 @@ package Server_Handler is
 
    package Active_Clients is new Maps_G (Key_Type => ASU.Unbounded_String,
                                          Value_Type => Client_Data,
-                                         Max_Size => Integer'Value(ACL.Argument(2)),
+                                         Max_Size => Max_Clients,
                                          "=" => ASU."=");
 
    --TABLA DE SIMBOLOS
