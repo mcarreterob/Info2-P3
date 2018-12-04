@@ -74,7 +74,7 @@ procedure Chat_Server_2 is
 	IP: String := LLU.To_IP(ASU.To_String(Maquina));
    Option: Character;
 	Max_Clients: Integer;
-	
+
 	Arguments_Error: exception;
 
 begin
@@ -114,7 +114,9 @@ begin
 
 exception
 	When CONSTRAINT_ERROR =>
+      ATIO.New_Line;
 	   ATIO.Put_Line("Please, only positive numbers between 2 and 50");
+      ATIO.New_Line;
 		LLU.Finalize;
    when Arguments_Error =>
       ATIO.New_Line;
