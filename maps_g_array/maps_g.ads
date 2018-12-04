@@ -2,7 +2,7 @@
 generic
    type Key_Type is private;
    type Value_Type is private;
-   Max_Size: in Natural;
+   Max_Size: in Integer;
    with function "=" (K1, K2: Key_Type) return Boolean;
 
 package Maps_G is
@@ -57,7 +57,7 @@ private
    type Cell_Array_A is access Cell_Array;
 
    type Map is record
-      P_Array: Cell_Array_A:= new Cell_Array;
+      P_Array: Cell_Array_A;
       Length  : Natural:= 0;
    end record;
 
