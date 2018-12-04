@@ -34,7 +34,6 @@ package body Server_Handler is
       Success: Boolean;
    begin
       Mess:= CM.Message_Type'Input(P_Buffer);
-      --ATIO.Put_line(CM.Message_Type'Image(Mess));
       if Mess = CM.Init then
          Client_EP_Receive := LLU.End_Point_Type'Input(P_Buffer);
          Client_EP_Handler := LLU.End_Point_Type'Input(P_Buffer);
@@ -56,9 +55,7 @@ package body Server_Handler is
             CM.Message_Type'Output(P_Buffer, Mess);
             ASU.Unbounded_String'Output(P_Buffer, ASU.To_Unbounded_String("server"));
             ASU.Unbounded_String'Output(P_Buffer, Comentario);
-            ATIO.Put_Line("hasta aqui he llegao");
-            Send_To_All(Map_Active, P_Buffer, Nick);
-            ATIO.Put_Line("hasta aqui he llegao");
+            --Send_To_All(Map_Active, P_Buffer, Nick);
             Hora_entrada := Ada.Calendar.Clock;
             -- Meto los valores en la tabla
             Datos_Cliente.Client_EP_Handler := Client_EP_Handler;
@@ -70,6 +67,7 @@ package body Server_Handler is
                   Full_Map := True;
                else
                   Active_Clients.Put(Map_Active, Nick, (Client_EP_Handler, Hora_entrada));
+
                end if;
                exception
                   when Active_Clients.Full_Map =>
@@ -110,6 +108,7 @@ package body Server_Handler is
                   end;
                end if;
             end if;
+            Send_To_All(Map_Active, P_Buffer, Nick);
          else
             ATIO.Put_Line("IGNORED. Nick already used.");
             LLU.Reset(P_Buffer.all);
@@ -122,7 +121,9 @@ package body Server_Handler is
          Nick := ASU.Unbounded_String'Input(P_Buffer);
          Comentario := ASU.Unbounded_String'Input(P_Buffer);
          Active_Clients.Get(Map_Active, Nick, Datos_Cliente, Success);
+         ATIO.Put_Line(Boolean'Image(Success));
          if Success then
+            ATIO.Put_Line("hasta aqui he llegao");
             if Datos_Cliente.Client_EP_Handler = Client_EP_Handler then
                ATIO.Put_Line("Writer received from " & ASU.To_String(Nick)
                               & ": " & ASU.To_String(Comentario));
@@ -135,7 +136,11 @@ package body Server_Handler is
                ASU.Unbounded_String'Output(P_Buffer, Nick);
                ASU.Unbounded_String'Output(P_Buffer, Comentario);
                Send_To_All(Map_Active, P_Buffer, Nick);
+            else
+               ATIO.Put_Line("unknown client. IGNORED");
             end if;
+         else
+            ATIO.Put_Line("unknown client. IGNORED");
          end if;
       elsif Mess = CM.Logout then
          Client_EP_Handler := LLU.End_Point_Type'Input(P_Buffer);

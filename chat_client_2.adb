@@ -77,7 +77,6 @@ begin
             ATIO.Put(">>");
             Comentario := ASU.To_Unbounded_String(Ada.Text_IO.Get_Line);
             if Comentario = ".quit" then
-               ATIO.Put_Line("vsrgah");
                LLU.Reset(Buffer);
                Mess := CM.Logout;
                CM.Message_Type'Output(Buffer'Access, Mess);
@@ -87,7 +86,6 @@ begin
                Finish := True;
                LLU.Finalize;
             else
-               --ATIO.Put_Line("|" & ASU.To_String(Comentario) & "|");
                LLU.Reset(Buffer);
                Mess := CM.Writer;
                CM.Message_Type'Output(Buffer'Access, Mess);
