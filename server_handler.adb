@@ -49,14 +49,16 @@ package body Server_Handler is
             Boolean'Output(P_Buffer, Acogido);
             LLU.Send(Client_EP_Receive, P_Buffer);
             ATIO.Put_Line("ACCEPTED");
-            Comentario := ASU.To_Unbounded_String(ASU.To_String(Nick)
-                                                & " joins the chat.");
             LLU.Reset(P_Buffer.all);
             Mess := CM.Server;
+            Comentario := ASU.To_Unbounded_String(ASU.To_String(Nick)
+                                                & " joins the chat.");
             CM.Message_Type'Output(P_Buffer, Mess);
             ASU.Unbounded_String'Output(P_Buffer, ASU.To_Unbounded_String("server"));
             ASU.Unbounded_String'Output(P_Buffer, Comentario);
+            ATIO.Put_Line("hasta aqui he llegao");
             Send_To_All(Map_Active, P_Buffer, Nick);
+            ATIO.Put_Line("hasta aqui he llegao");
             Hora_entrada := Ada.Calendar.Clock;
             -- Meto los valores en la tabla
             Datos_Cliente.Client_EP_Handler := Client_EP_Handler;
