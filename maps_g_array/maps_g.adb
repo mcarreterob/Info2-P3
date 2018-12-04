@@ -1,5 +1,6 @@
+with Ada.Text_IO;
 package body Maps_G is
-
+	package ATIO renames Ada.Text_IO;
 	procedure Get(M: Map;
 				     Key: in Key_Type;
 				     Value: out Value_Type;
@@ -26,12 +27,14 @@ package body Maps_G is
 				     Key: in Key_Type;
 				     Value: in Value_Type) is
 
-		Index: Natural:= 1;
-		Found: Boolean:= False;
+		Index: Natural;
+		Found: Boolean;
 	begin
 		if M.P_Array = null then
 			M.P_Array := new Cell_Array;
 		end if;
+		Found := False;
+		Index := 1;
 		while Index <= Max_Size and not Found loop
 			if M.P_Array(Index).Full then
 				if M.P_Array(Index).Key = Key then
@@ -50,7 +53,9 @@ package body Maps_G is
 				--AÑADE al FINAL:
 				while Index <= Max_Size and not Found loop
 					if not M.P_Array(Index).Full then
-						M.P_Array(Index) := (Key, Value, True);
+						M.P_Array(Index).Key := Key;
+            		M.P_Array(Index).Value := Value;
+            		M.P_Array(Index).Full := True;
 						M.Length := M.Length + 1;
 						Found :=  True;
 					end if;
