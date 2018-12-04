@@ -50,7 +50,7 @@ private
    type Cell is record
       Key   : Key_Type;
       Value : Value_Type;
-      Empty : Boolean:= True;
+      Full : Boolean:= True;
    end record;
 
    type Cell_Array is array(1..Max_Size) of Cell;
@@ -63,7 +63,7 @@ private
 
    type Cursor is record
       M       : Map;
-      Position: Natural;
+      Element: Natural := 0;
    end record;
 
 end Maps_G;
