@@ -37,8 +37,6 @@ procedure Chat_Client_2 is
    Welcomed_Error: exception;
 
 begin
-	--Maquina := ASU.To_Unbounded_String(ACL.Argument(1));
-	--IP := ASU.To_String(ASU.To_Unbounded_String(LLU.To_IP(Maquina)));
 	Puerto := Integer'Value(ACL.Argument(2));
 	Nick := ASU.To_Unbounded_String(ACL.Argument(3));
 

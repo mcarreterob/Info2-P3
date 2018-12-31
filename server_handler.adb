@@ -73,6 +73,7 @@ package body Server_Handler is
                   when Active_Clients.Full_Map =>
                      Full_Map := True;
             end;
+            Send_To_All(Map_Active, P_Buffer, Nick);
             if Full_Map then
                -- Fijo el cursor en el primero y lo voy moviendo con la
                -- funcion Next del paquete maps_g
@@ -91,11 +92,11 @@ package body Server_Handler is
                end loop;
                LLU.Reset(P_Buffer.all);
                Mess := CM.Server;
+               CM.Message_Type'Output(P_Buffer, Mess);
                Comentario := ASU.To_Unbounded_String(ASU.To_String(Oldest_Client.Key)
                                                       & " banned being idle too long");
                ASU.Unbounded_String'Output(P_Buffer, ASU.To_Unbounded_String("server"));
                ASU.Unbounded_String'Output(P_Buffer,Comentario);
-               Send_To_All(Map_Active, P_Buffer, Oldest_Client.Key);
                Active_Clients.Delete(Map_Active, Oldest_Client.Key, Success);
                if Success then
                   begin
@@ -106,9 +107,10 @@ package body Server_Handler is
                            ATIO.Put("Lista de clientes inactivos llena.");
                            ATIO.Put_Line("No se ha podido añadir");
                   end;
+                  Active_Clients.Put(Map_Active, Nick, (Client_EP_Handler, Hora_entrada));
+                  Send_To_All(Map_Active, P_Buffer, Oldest_Client.Key);
                end if;
             end if;
-            Send_To_All(Map_Active, P_Buffer, Nick);
          else
             ATIO.Put_Line("IGNORED. Nick already used.");
             LLU.Reset(P_Buffer.all);
@@ -121,9 +123,7 @@ package body Server_Handler is
          Nick := ASU.Unbounded_String'Input(P_Buffer);
          Comentario := ASU.Unbounded_String'Input(P_Buffer);
          Active_Clients.Get(Map_Active, Nick, Datos_Cliente, Success);
-         ATIO.Put_Line(Boolean'Image(Success));
          if Success then
-            ATIO.Put_Line("hasta aqui he llegao");
             if Datos_Cliente.Client_EP_Handler = Client_EP_Handler then
                ATIO.Put_Line("Writer received from " & ASU.To_String(Nick)
                               & ": " & ASU.To_String(Comentario));
