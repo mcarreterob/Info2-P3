@@ -50,7 +50,7 @@ private
    type Cell is record
       Key   : Key_Type;
       Value : Value_Type;
-      Full : Boolean:= True;
+      Full : Boolean:= False;
    end record;
 
    type Cell_Array is array(1..Max_Size) of Cell;
